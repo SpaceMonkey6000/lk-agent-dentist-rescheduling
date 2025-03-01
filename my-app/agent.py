@@ -1,5 +1,5 @@
-from livekit.plugins.elevenlabs import tts
-# from livekit.plugins import google
+from livekit.plugins.cartesia import tts
+# from livekit.plugins.elevenlabs import tts
 from livekit.plugins import openai
 
 import logging
@@ -27,6 +27,7 @@ def prewarm(proc: JobProcess):
 
 
 async def entrypoint(ctx: JobContext):
+
     initial_ctx = llm.ChatContext().append(
         role="system",
         text=(
@@ -43,6 +44,11 @@ async def entrypoint(ctx: JobContext):
     )
 
     logger.info(f"connecting to room {ctx.room.name}")
+    print("###############################")
+    print(ctx.room.name)
+    print("###############################")
+    # print(participant.identity)
+    print("###############################")
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
 
     # Wait for the first participant to connect
@@ -54,32 +60,39 @@ async def entrypoint(ctx: JobContext):
     # Learn more and pick the best one for your app:
     # https://docs.livekit.io/agents/plugins
 
-    eleven_tts=tts.TTS(
-        model="eleven_turbo_v2_5",
-        voice=tts.Voice(
-            id="z7U1SjrEq4fDDDriOQEN", #Clara
-            name="Vivie",
-            category="professional",
-            settings=tts.VoiceSettings(
-                # stability=0.71,
-                stability=0.71,
-                # similarity_boost=0.5,
-                similarity_boost=0.5,
-                # style=0.0,
-                style=0.0,
-                use_speaker_boost=True,
-                # optimize_streaming_latency=0
-            ),
-        ),
-        language="en",
-        streaming_latency=0,
-        # enable_ssml_parsing=False,
-        enable_ssml_parsing=False,
-        chunk_length_schedule=[80, 120, 200, 260],
-        # chunk_length_schedule=[50, 100, 150],
-        # melding_steps=5,
-        # overlap_ratio=0.3
-    )
+    # eleven_tts=tts.TTS(
+    #     model="eleven_turbo_v2_5",
+    #     voice=tts.Voice(
+    #         id="z7U1SjrEq4fDDDriOQEN", #Clara
+    #         name="Vivie",
+    #         category="professional",
+    #         settings=tts.VoiceSettings(
+    #             # stability=0.71,
+    #             stability=0.71,
+    #             # similarity_boost=0.5,
+    #             similarity_boost=0.5,
+    #             # style=0.0,
+    #             style=0.0,
+    #             use_speaker_boost=True,
+    #             # optimize_streaming_latency=0
+    #         ),
+    #     ),
+    #     language="en",
+    #     streaming_latency=0,
+    #     # enable_ssml_parsing=False,
+    #     enable_ssml_parsing=False,
+    #     chunk_length_schedule=[80, 120, 200, 260],
+    #     # chunk_length_schedule=[50, 100, 150],
+    #     # melding_steps=5,
+    #     # overlap_ratio=0.3
+    # )
+    cartesia_tts = tts.TTS(
+        model="sonic",
+        # voice="c2ac25f9-ecc4-4f56-9095-651354df60c0",
+        voice="694f9389-aac1-45b6-b726-9d9369183238",
+        speed=0.1,
+        emotion=["curiosity:high", "positivity:highest","surprise:highest"],
+        )
     # grok
     # groq_llm = llm.LLM.with_groq(
     #     model="llama3-8b-8192",
@@ -95,12 +108,14 @@ async def entrypoint(ctx: JobContext):
         # sdlkmd
 
         llm=openai.LLM(model="gpt-4o-mini"),
+        # llm=openai.LLM(model="o3-mini"),
+        # llm=openai.LLM(model="o3-mini-2025-01-31"),
         #       model="sonic-english",
         #       voice="c2ac25f9-ecc4-4f56-9095-651354df60c0",
         #       speed=0.8,
         #       emotion=["curiosity:highest", "positivity:high"]
         # ),
-        tts=eleven_tts,
+        tts=cartesia_tts,
         turn_detector=turn_detector.EOUModel(),
         # minimum delay for endpointing, used when turn detector believes the user is done with their turn
         min_endpointing_delay=0.5,
